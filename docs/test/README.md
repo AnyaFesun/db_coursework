@@ -3,33 +3,29 @@
 Тестування системи проводилось у IDE JetBrains IntelliJ IDEA за допомогою застосунку Postman
 
 ## Створення опитування
-### Успішне створення
-![screen1](./images/screen1.png)
-
-### Неуспішне створення
-![screen2](./images/screen2.png)
-
+![picture1](./images/picture1.png)
+Успішне створення опитування
 
 ## Редагування опитування
-### Успішне редагування
-![screen3](./images/screen3.png)
+![picture2](./images/picture2.png)
+Успішне редагування опитування
 
-### Неуспішне редагування
-![screen4](./images/screen4.png)
+![picture3](./images/picture3.png)
+Неуспішне редагування опитування (SurveyNotExistException)
 
+## Отримання опитування
+![picture4](./images/picture4.png)
+Успішне отримання опитування
 
-## Отримання всіх опитувань
-### Успішне отримання
-![screen5](./images/screen5.png)
-
-
-## Отримання одного опитування
-### Успішне отримання
-![screen6](./images/screen6.png)
+![picture5](./images/picture5.png)
+Неуспішне отримання опитування (SurveyNotExistException)
 
 ## Видалення опитування
-### Успішне видалення
-![screen7](./images/screen7.png)
+![picture6](./images/picture6.png)
+Успішне видалення опитування за id
 
-### Неуспішне видалення
-![screen8](./images/screen8.png)
+![picture7](./images/picture7.png)
+Неуспішне видалення опитування
+
+![picture8](./images/picture8.png)
+Успішне видалення опитування за значенням title
