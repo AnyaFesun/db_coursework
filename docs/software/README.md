@@ -224,290 +224,277 @@ RESTfull API представляє собою CRUD застосунок.
 
 ```
     plugins {
-	    id 'java'
-	    id 'org.springframework.boot' version '3.2.0'
-	    id 'io.spring.dependency-management' version '1.1.4'
-    }
+	id 'java'
+	id 'org.springframework.boot' version '3.1.7'
+	id 'io.spring.dependency-management' version '1.1.4'
+}
 
-    group = 'com.example'
-    version = '0.0.1-SNAPSHOT'
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
 
-    java {
-	    sourceCompatibility = '17'
-    }
+java {
+	sourceCompatibility = '17'
+}
 
-    repositories {
-	    mavenCentral()
-    }
+repositories {
+	mavenCentral()
+}
 
-    dependencies {
-	    implementation 'org.springframework.boot:spring-boot-starter-web'
-	    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	    implementation 'mysql:mysql-connector-java:8.0.28'
-	    runtimeOnly 'mysql:mysql-connector-java'
-	    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    }
 
-    tasks.named('test') {
-	    useJUnitPlatform()
-    }
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'mysql:mysql-connector-java:8.0.28'
+	runtimeOnly 'mysql:mysql-connector-java'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('bootBuildImage') {
+	builder = 'paketobuildpacks/builder-jammy-base:latest'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
 ```
 
 ### Підключення бази даних
 
 ```
     spring.jpa.hibernate.ddl-auto=update
-    spring.datasource.url=jdbc:mysql://localhost:3306/lab6?useUnicode=true&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
-    spring.datasource.username=root
-    spring.datasource.password=7327Tim2005&
+spring.datasource.url=jdbc:mysql://localhost:3306/survey?useUnicode=true&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=8117
 
 ```
 
 ### Основний клас для запуску API
 ```
-    package com.example.lab6;
+    package com.example.coursework;
 
-    import org.springframework.boot.SpringApplication;
-    import org.springframework.boot.autoconfigure.SpringBootApplication;
-    
-    @SpringBootApplication
-    public class Lab6Application {
-    
-        public static void main(String[] args) {
-            SpringApplication.run(Lab6Application.class, args);
-        }
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class CourseworkApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(CourseworkApplication.class, args);
+	}
+
+}
     }
 ```
 
 ### Клас сутності для взаємодії з БД
 
 ```
-    package com.example.lab6.Entity;
+   package com.example.coursework.entity;
 
-    import jakarta.persistence.*;
-    import java.sql.Date;
-    import java.time.LocalDate;
-    
-    @Entity
-    @Table(name = "survey")
-    public class SurveyEntity {
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
-        private String title;
-        private String description;
-        private Date created = Date.valueOf(LocalDate.now());
-    
-        public SurveyEntity() {
-        }
-        public void setId(Long id) {
-            this.id = id;
-        }
-    
-        public Long getId() {
-            return id;
-        }
-    
-        public String getTitle() {
-            return title;
-        }
-    
-        public void setTitle(String title) {
-            this.title = title;
-        }
-    
-        public String getDescription() {
-            return description;
-        }
-    
-        public void setDescription(String description) {
-            this.description = description;
-        }
-    
-        public Date getCreated() {
-            return created;
-        }
-    
-        public void setCreated(Date created) {
-            this.created = created;
-        }
+
+import jakarta.persistence.*;
+
+import java.sql.Date;
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "survey")
+@SequenceGenerator(name = "survey_sequence", sequenceName = "survey_sequence", allocationSize = 1)
+public class SurveyEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "survey_sequence")
+    private Long id;
+    private String title;
+    private String description;
+    private Date created = Date.valueOf(LocalDate.now());
+
+
+    public SurveyEntity(){
     }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Date getDate() {
+        return created;
+    }
+
+    public void setDate(Date created) {
+        this.created = created;
+    }
+}
 ```
 
 ### Контролер для роботи з опитуваннями
 
 ```
-    package com.example.lab6.Controller;
+   package com.example.coursework.controller;
 
-    import com.example.lab6.Entity.SurveyEntity;
-    import com.example.lab6.Exception.SurveyAlreadyExistException;
-    import com.example.lab6.Exception.SurveyNotFoundException;
-    import com.example.lab6.Service.SurveyService;
-    import org.springframework.beans.factory.annotation.Autowired;
-    import org.springframework.http.ResponseEntity;
-    import org.springframework.web.bind.annotation.*;
+import com.example.coursework.entity.SurveyEntity;
+import com.example.coursework.exeptions.SurveyNotExistException;
+import com.example.coursework.service.SurveyService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-    @RestController
-    @RequestMapping("/surveys")
-    public class SurveyController {
+@RestController
+@RequestMapping("/survey")
+public class SurveyController {
+    @Autowired
+    private SurveyService surveyService;
 
-        @Autowired
-        private SurveyService surveyService;
-
-        @PostMapping
-        public ResponseEntity createSurvey(@RequestBody SurveyEntity survey){
-        try {
-            surveyService.createSurvey(survey);
-            return ResponseEntity.ok("Опитування було створено успішно");
-        } catch (SurveyAlreadyExistException exception){
-            return ResponseEntity.badRequest().body(exception.getMessage());
-        } catch (Exception exception){
-            return ResponseEntity.badRequest().body("Відбулась помилка створення опитування!");
-        }
+    @PostMapping
+    public ResponseEntity createSurvey(@RequestBody SurveyEntity survey){
+        try{
+            surveyService.add(survey);
+            return ResponseEntity.ok("Опитування успішно збережене");
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body("Помилка додавання опитування");
         }
 
-        @GetMapping
-        public ResponseEntity getOneSurvey(@RequestParam Long id){
-            try {
-                return ResponseEntity.ok(surveyService.getOne(id));
-            } catch (SurveyNotFoundException exception){
-                return ResponseEntity.badRequest().body(exception.getMessage());
-            } catch (Exception exception){
-                return ResponseEntity.badRequest().body("Відбулась помилка отримання опитувань");
-            }
-        }
+    }
 
-        @GetMapping("/all")
-        public ResponseEntity getSurveys(){
-            try {
-                return ResponseEntity.ok(surveyService.getSurveys());
-            } catch (SurveyNotFoundException exception){
-                return ResponseEntity.badRequest().body(exception.getMessage());
-            } catch (Exception exception){
-                return ResponseEntity.badRequest().body("Відбулась помилка отримання опитувань");
-            }
-        }
-
-        @DeleteMapping("/{id}")
-        public ResponseEntity deleteSurvey(@PathVariable Long id){
-            try {
-                return ResponseEntity.ok("Було успішно видалено опитування з id: " +
-                        surveyService.deleteSurvey(id));
-            } catch (SurveyNotFoundException exception){
-                return ResponseEntity.badRequest().body(exception.getMessage());
-            } catch (Exception exception){
-                return ResponseEntity.badRequest().body("Відбулась помилка отримання опитувань");
-            }
-        }
-
-         @PutMapping
-        public ResponseEntity updateSurvey(@RequestParam Long id,
-                                           @RequestBody SurveyEntity survey){
-            try {
-                surveyService.updateSurvey(id, survey);
-                return ResponseEntity.ok("Опитування було оновлено успішно");
-            }catch (SurveyAlreadyExistException exception) {
-                return ResponseEntity.badRequest().body(exception.getMessage());
-            } catch (Exception exception){
-                return ResponseEntity.badRequest().body("Відбулась помилка оновлення опитування!");
-            }
+    @GetMapping
+    public ResponseEntity getSurvey(@RequestParam Long id){
+        try{
+            return ResponseEntity.ok(surveyService.get(id));
+        }catch (SurveyNotExistException ex){
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        } catch (Exception e){
+            return ResponseEntity.badRequest().body("Виникла помилка");
         }
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteByIdSurvey(@PathVariable Long id){
+        try{
+            return ResponseEntity.ok("Видалено опитування з значенням id: " + surveyService.delete(id));
+        }catch (SurveyNotExistException ex){
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        } catch (Exception e){
+            return ResponseEntity.badRequest().body("Помилка");
+        }
+    }
+
+    @DeleteMapping("/title/{title}")
+    public ResponseEntity deleteByTitleSurvey(@PathVariable String title){
+        try{
+
+            return ResponseEntity.ok("Видалено опитування з значенням id: " + surveyService.deleteByTitle(title) + " та назвою: " + title);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body("Помилка");
+        }
+    }
+    @PutMapping
+    public ResponseEntity updateSurvey(@RequestParam Long id, @RequestBody SurveyEntity survey){
+        try {
+            surveyService.update(id, survey);
+            return ResponseEntity.ok("Опитування було оновлено успішно");
+        }catch (SurveyNotExistException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        } catch (Exception e){
+            return ResponseEntity.badRequest().body("Помилка оновлення опитування");
+        }
+    }
+
+}
 ```
 
 ### Репозиторій для роботи з опитуванняи
 
 ```
-    package com.example.lab6.Repository;
+   package com.example.coursework.repository;
 
-    import com.example.lab6.Entity.SurveyEntity;
-    import org.springframework.data.repository.CrudRepository;
-    
-    public interface SurveyRepo extends CrudRepository <SurveyEntity, Long>{
-        SurveyEntity findByTitle(String title);
-    }
+import com.example.coursework.entity.SurveyEntity;
+import org.springframework.data.repository.CrudRepository;
+
+public interface SurveyRepo extends CrudRepository<SurveyEntity, Long> {
+    SurveyEntity findByTitle(String title);
+}
 ```
 
 ### Сервіс для роботи з опитуваннями
 
 ```
-    package com.example.lab6.Service;
+    package com.example.coursework.service;
 
-    import com.example.lab6.Entity.SurveyEntity;
-    import com.example.lab6.Exception.SurveyAlreadyExistException;
-    import com.example.lab6.Exception.SurveyNotFoundException;
-    import com.example.lab6.Repository.SurveyRepo;
-    import org.springframework.beans.factory.annotation.Autowired;
-    import org.springframework.stereotype.Service;
-    
-    @Service
-    public class SurveyService {
-    
-        @Autowired
-        private SurveyRepo surveyRepo;
-    
-        public SurveyEntity createSurvey(SurveyEntity survey) throws SurveyAlreadyExistException {
-            if(surveyRepo.findByTitle(survey.getTitle()) != null){
-                throw new SurveyAlreadyExistException("Опитування з такою назвою вже існує!");
-            }
-            return surveyRepo.save(survey);
-        }
-        
-        public SurveyEntity getOne(Long id) throws SurveyNotFoundException {
-            SurveyEntity survey = surveyRepo.findById(id).get();
-            if(survey == null){
-                throw new SurveyNotFoundException("Такого опитування не існує");
-            }
-            return survey;
-        }
-        
-        public Iterable<SurveyEntity> getSurveys() throws SurveyNotFoundException {
-            Iterable<SurveyEntity> surveyEntities = surveyRepo.findAll();
-            if (surveyEntities == null){
-                throw new SurveyNotFoundException("Опитувань не існує");
-            }
-            return surveyEntities;
-        }
-        
-        public Long deleteSurvey(Long id) throws SurveyNotFoundException {
-            if (surveyRepo.findById(id) == null){
-                throw new SurveyNotFoundException("Такого опитування вже не існує");
-            }
-            surveyRepo.deleteById(id);
-            return id;
-        }
-        
-        public SurveyEntity updateSurvey(Long id, SurveyEntity survey) throws SurveyAlreadyExistException {
-            SurveyEntity surveyEntity = surveyRepo.findById(id).get();
-            surveyEntity.setTitle(survey.getTitle());
-            surveyEntity.setDescription(survey.getDescription());
-            if(surveyRepo.findByTitle(surveyEntity.getTitle()) != null){
-                throw new SurveyAlreadyExistException("Опитування з такою назвою вже існує!");
-            }
-            return surveyRepo.save(surveyEntity);
-        }
+import com.example.coursework.entity.SurveyEntity;
+import com.example.coursework.exeptions.SurveyNotExistException;
+import com.example.coursework.repository.SurveyRepo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class SurveyService {
+    @Autowired
+    private SurveyRepo surveyRepository;
+    public void add(SurveyEntity survey) {
+        surveyRepository.save(survey);
     }
+    public SurveyEntity get(Long id) throws SurveyNotExistException {
+        if(surveyRepository.findById(id).isEmpty()){
+            throw new SurveyNotExistException("Опитування з таким id не існує!");
+        }
+        return surveyRepository.findById(id).get();
+    }
+
+    public Long delete(Long id) throws SurveyNotExistException {
+        if(surveyRepository.findById(id).isEmpty()){
+            throw new SurveyNotExistException("Ви не можете видалити це опитування, бо його не існує!");
+        }
+        surveyRepository.deleteById(id);
+        return id;
+    }
+    public Long deleteByTitle(String title){
+        SurveyEntity survey = surveyRepository.findByTitle(title);
+        surveyRepository.delete(survey);
+        return survey.getId();
+    }
+
+    public void update(Long id, SurveyEntity updateSurvey) throws SurveyNotExistException {
+        if(surveyRepository.findById(id).isEmpty()){
+            throw new SurveyNotExistException("Опитування з таким id не існує! Ви не можете оновити дані для не існуючого опитування!");
+        }
+        SurveyEntity survey = surveyRepository.findById(id).get();
+        survey.setTitle(updateSurvey.getTitle());
+        survey.setDescription(updateSurvey.getDescription());
+        surveyRepository.save(survey);
+    }
+}
+
 ```
 
 ### Виняткові ситуації, які можуть виникнути
 
 ```
-    package com.example.lab6.Exception;
-    
-    public class SurveyAlreadyExistException extends Exception{
-        public SurveyAlreadyExistException(String message) {
-            super(message);
-        }
-    }
-```
+   package com.example.coursework.exeptions;
 
-```
-    package com.example.lab6.Exception;
-
-    public class SurveyNotFoundException extends Exception{
-        public SurveyNotFoundException(String message) {
-            super(message);
-        }
+public class SurveyNotExistException  extends Exception{
+    public SurveyNotExistException(String message){
+        super(message);
     }
+}
 ```
